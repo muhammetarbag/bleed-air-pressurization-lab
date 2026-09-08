@@ -4,7 +4,7 @@ Tarih: 2026-09-08. Son kaynaklar ve bunlardan üretilmiş `dist/` üzerinde doğ
 
 ## Sonuç
 
-**PASS — yerel uygulama ve GitHub Pages'e uygun statik paket.** Uzak GitHub repository, Actions çalıştırması veya public Pages yayını bu teslim kapsamında yapılmadı; yayın başarısı iddia edilmez.
+**PASS — yerel doğrulama ve public GitHub Pages yayını.** `main` push workflow'u başarılı oldu; anonim HTTP kontrollerinde uygulama kökü ve derlenmiş JS asset'i 200 döndü.
 
 | Kontrol | Sonuç | Kanıt |
 | --- | --- | --- |
@@ -21,6 +21,9 @@ Tarih: 2026-09-08. Son kaynaklar ve bunlardan üretilmiş `dist/` üzerinde doğ
 | Üretim izolasyonu | PASS | Development-only `__labSnapshot` üretim kodunda ve `window` nesnesinde yok |
 | Harici çalışma zamanı bağımlılığı | PASS | Üretim sayfasının bütün kaynak istekleri yerel uygulama alt yolundan; fontlar dahil |
 | Üretim bağımlılık denetimi | PASS | `npm audit --omit=dev --json`: bilinen 0 vulnerability; bu tam güvenlik incelemesi değildir |
+| GitHub Pages workflow | PASS | `34260373718`: validate ve deploy job'ları başarılı |
+| Public uygulama kökü | PASS | `https://muhammetarbag.github.io/bleed-air-pressurization-lab/` anonim HTTP 200 |
+| Public uygulama asset'i | PASS | Üretim HTML'inin bildirdiği JS asset'i anonim HTTP 200 |
 | Yeni dosya whitespace | PASS | 21 yazılmış kaynak / test / yapılandırma dosyasına `git diff --no-index --check /dev/null <file>` uygulandı |
 
 ## Fizik ve mantık kanıtı

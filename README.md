@@ -11,6 +11,8 @@ npm run dev
 
 Yerel adres: http://127.0.0.1:3025/ . Üretim çıktısı `npm run build` ile `dist/` altında oluşur. `npm run preview` üretim çıktısını aynı portta sunar; önce geliştirme sunucusunu durdurun.
 
+Canlı sürüm: [Bleed Air &amp; Pressurization Lab](https://muhammetarbag.github.io/bleed-air-pressurization-lab/)
+
 ## Öğrenme alanları
 
 16 bölüm aynı `AircraftState` nesnesini kullanır: sistem sinoptiği, bleed temelleri, engine / precooler, manifold / crossbleed, pack / ram air, ACM, üç kabin bölgesi, basınçlandırma, manuel outflow, tam uçuş, arızalar, teşhis, 15 rehberli deney, serbest deney, 20 bileşen ve 42 sorulu quiz. Ayrıca üç tahmin deneyi ve dört süreli challenge bulunur. BASIC görünüm ana kaynak, pack, kabin ve outflow bloklarını sadeleştirir; ENGINEERING ayrıntılı sinoptiği, MAINTENANCE actual / indicated ölçümlerini gösterir. Artan kaçak ve challenge puanı fizik alt adımlarında hesaplanır; ekran yenilemesine bağlı değildir.
@@ -67,7 +69,7 @@ python3 -m venv .venv
 
 `vite.config.ts` içinde `base: './'` kullanılır; uygulama herhangi bir repository alt yolundan sunulabilir. `.github/workflows/pages.yml`, `main` push veya manuel tetikleme ile test, format, TypeScript kontrolü ve build sonrası `dist/` yayımlar. PR çalıştırmaları yalnız doğrular.
 
-Yayın için repository GitHub Pages ayarında kaynak `GitHub Actions` olmalı ve `github-pages` environment, yayımlanan branch'e izin vermelidir. Yerel üretim çıktısı hazırlanması, uzak yayının tamamlandığı anlamına gelmez. Bu çalışma tesliminde uzak repository / Pages yayını yapılmadı.
+Yayın için repository GitHub Pages kaynağı `GitHub Actions` olarak yapılandırılmıştır. `main` push çalışması test, format, TypeScript kontrolü ve build sonrasında `dist/` artifact'ini yayımlar. Canlı repository: [muhammetarbag/bleed-air-pressurization-lab](https://github.com/muhammetarbag/bleed-air-pressurization-lab). Son başarılı Pages çalışması: [Actions run](https://github.com/muhammetarbag/bleed-air-pressurization-lab/actions).
 
 ## Dosyalar
 
