@@ -650,7 +650,7 @@ export function Synoptic({
           id="mix-supply"
           highlight={tracingDestination(traceTarget)}
         />
-        <text x="480" y="498" textAnchor="middle" className="diagram-note">
+        <text x="492" y="498" className="diagram-note">
           MIX MANIFOLD · {format(s.mixTemp)} °C
         </text>
         <g
@@ -776,12 +776,12 @@ export function CabinCutaway({ s }: { s: AircraftState }) {
           return (
             <g key={i}>
               <Flow
-                d={`M${x} 110 V145 h35 v58`}
+                d={`M${x} 110 V135 h35 v18`}
                 flow={s.zoneFlows[i]}
                 id={`zone-${i}`}
               />
               <text
-                x={x + 40}
+                x={x + 35}
                 y="175"
                 textAnchor="middle"
                 className="zone-value"
@@ -789,7 +789,7 @@ export function CabinCutaway({ s }: { s: AircraftState }) {
                 {format(s.zoneTemps[i])}°
               </text>
               <text
-                x={x + 40}
+                x={x + 35}
                 y="195"
                 textAnchor="middle"
                 className="diagram-note"
@@ -797,7 +797,7 @@ export function CabinCutaway({ s }: { s: AircraftState }) {
                 {["COCKPIT", "FORWARD", "AFT"][i]}
               </text>
               <text
-                x={x + 40}
+                x={x + 35}
                 y="217"
                 textAnchor="middle"
                 className="diagram-label"
@@ -817,7 +817,7 @@ export function CabinCutaway({ s }: { s: AircraftState }) {
           />
         ))}
         <Flow
-          d="M350 228 V258 H152 V305 H525 V110"
+          d="M350 228 V258 H152 V305 H560 V110"
           flow={s.recircFlow}
           color="recirc"
           id="cabin-recirc"
