@@ -107,6 +107,7 @@ const newSource = (name: string): Source => ({
   valve: 0,
   command: 0,
   protected: false,
+  leakLatched: false,
   ductTemp: 25,
   checkOpen: false,
 });
@@ -272,7 +273,10 @@ export function setFault(
 }
 export function clearFaults(s: AircraftState): void {
   s.faults = [];
-  s.sources.forEach((x) => (x.protected = false));
+  s.sources.forEach((x) => {
+    x.protected = false;
+    x.leakLatched = false;
+  });
   s.packs.forEach((x) => (x.trip = false));
   log(s, "Arızalar temizlendi; koruma kilitleri yeniden kuruldu", "action");
 }
@@ -396,6 +400,7 @@ function network(s: AircraftState, dt: number): void {
       4,
       dt,
     );
+    if (eng && src.ductTemp > 115) src.leakLatched = true;
     if (
       eng &&
       !src.protected &&
@@ -424,7 +429,8 @@ function network(s: AircraftState, dt: number): void {
     src.flow = 0;
     src.checkOpen = false;
   });
-  const leakDetected = s.sources.slice(0, 2).some((x) => x.ductTemp > 115);
+  // Leak detection latches like source protection; a cooled loop must not reopen crossbleed into the leak.
+  const leakDetected = s.sources.slice(0, 2).some((x) => x.leakLatched);
   s.isolationCommand = c.isolation && !leakDetected ? 1 : 0;
   const isoTarget = f(s, "iso_open")
     ? 1
@@ -1018,7 +1024,7 @@ export function why(s: AircraftState, subject: string): string {
     return `PACK ${i + 1}: ${p.status}. Gerçek valf %${Math.round(p.valve * 100)} açık, giriş ${p.inletPressure.toFixed(1)} psi, debi ${p.flow.toFixed(2)} / ${p.demand.toFixed(2)} kg/s. ${p.trip ? "Aşırı sıcaklık koruması kilitlendi; arıza giderilip koruma yeniden kurulmalı." : p.valve < 0.01 ? "Valf kapalı olduğu için akış yolu kesik." : p.inletPressure < 8 ? "Manifoldda yeterli basınç yok; kaynak ve isolation yolunu kontrol edin." : p.flow < p.demand * 0.85 ? "Kaynak kapasitesi toplam talebi karşılayamıyor." : `Ram air etkinliği %${Math.round(p.ram * 100)}; turbine ${p.coldTemp.toFixed(1)} °C, bypass sonrası ${p.outletTemp.toFixed(1)} °C.`}`;
   }
   if (subject === "isolation")
-    return `Isolation komutu %${s.isolationCommand * 100}, gerçek konumu %${Math.round(s.isolation * 100)}. ${s.sources.some((x) => x.ductTemp > 115) ? "Duct leak algılaması normal açma komutunu engelliyor." : f(s, "iso_open") || f(s, "iso_closed") ? "Mekanik sıkışma komutu izlemeyi engelliyor." : s.controls.isolation ? "Öğrencinin crossbleed komutu etkin." : "Öğrenci iki tarafı ayrı tuttu."} Net transfer ${s.crossflow.toFixed(2)} kg/s (pozitif: sol → sağ).`;
+    return `Isolation komutu %${s.isolationCommand * 100}, gerçek konumu %${Math.round(s.isolation * 100)}. ${s.sources.some((x) => x.leakLatched) ? "Duct leak algılaması normal açma komutunu engelliyor." : f(s, "iso_open") || f(s, "iso_closed") ? "Mekanik sıkışma komutu izlemeyi engelliyor." : s.controls.isolation ? "Öğrencinin crossbleed komutu etkin." : "Öğrenci iki tarafı ayrı tuttu."} Net transfer ${s.crossflow.toFixed(2)} kg/s (pozitif: sol → sağ).`;
   if (subject === "left" || subject === "right") {
     const i = subject === "left" ? 0 : 1;
     return `${subject.toUpperCase()} ${s.manifold[i].toFixed(1)} psi. Bağlı kaynak kapasitesi ${s.capacity[i].toFixed(2)} kg/s; bu tarafta talep ${s.demand[i].toFixed(2)}, sağlanan ${s.supplied[i].toFixed(2)} kg/s. ${s.manifold[i] < 8 ? "Açık valfle bağlı ve kullanılabilir kaynak bulunmuyor ya da kapasite yetersiz." : "Basınç; kaynak basıncı, tek yönlü check valve ve yükün ortak denge noktasından hesaplanır."}`;
