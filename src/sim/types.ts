@@ -63,6 +63,7 @@ export interface Source {
   valve: number;
   command: number;
   protected: boolean;
+  leakLatched: boolean;
   ductTemp: number;
   checkOpen: boolean;
 }

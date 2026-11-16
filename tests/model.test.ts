@@ -259,6 +259,23 @@ test("Stuck-open isolation carries bleed leak cross-load", () => {
   assert.ok(s.ductFlow[0] > 0.1);
   assert.ok(s.sources[1].flow > 0.65);
 });
+test("Duct leak isolation lockout stays latched after the detector cools", () => {
+  const s = createState();
+  setControl(s, "isolation", true);
+  setFault(s, "duct_leak_1", true);
+  advance(s, 30);
+  assert.ok(s.sources[1].protected);
+  for (let t = 0; t < 180; t++) {
+    advance(s, 1);
+    assert.ok(s.isolation < 0.01, `isolation reopened at ${s.time} s`);
+    assert.ok(s.ductFlow[1] < 0.01, `leak fed again at ${s.time} s`);
+  }
+  assert.ok(s.sources[1].ductTemp < 115);
+  assert.equal(s.isolationCommand, 0);
+  clearFaults(s);
+  advance(s, 5);
+  assert.ok(s.isolation > 0.99);
+});
 test("Pack cycle increases temperature in compressor and reduces it in turbine", () => {
   const s = createState();
   const p = s.packs[0];
