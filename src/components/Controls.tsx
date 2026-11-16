@@ -4,7 +4,7 @@ import type {
   Controls as ControlState,
   Pair,
 } from "../sim/types";
-import { indicated } from "../sim/engine";
+import { FIELD_TOLERANCE, fieldElevation, indicated } from "../sim/engine";
 export type Change = <K extends keyof ControlState>(
   key: K,
   value: ControlState[K],
@@ -393,6 +393,12 @@ export function PackControls({
         on={c.ground}
         onChange={() => change("ground", !c.ground)}
       />
+      <p className="hint">
+        GROUND MODE air/ground (WOW) sinyalini temsil eder. Uçak departure veya
+        landing meydan yüksekliğinin {FIELD_TOLERANCE} ft üzerindeyse seçilemez;
+        havada outflow zorla açılmaz, ground air kullanılamaz.
+        {fieldElevation(s) === null && !c.ground ? " Şu an uçak havada." : ""}
+      </p>
       <Toggle
         label="COOLING FAN"
         on={c.coolingFan}

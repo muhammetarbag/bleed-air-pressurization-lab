@@ -744,6 +744,40 @@ test("Warm initialization publishes consistent zone flow before first step", () 
   );
   assert.ok(s.zoneFlows.every((q) => q > 0));
 });
+test("GROUND MODE is rejected in flight like an air/ground signal", () => {
+  const s = createState("cruise");
+  setControl(s, "groundCart", true);
+  setControl(s, "ground", true);
+  assert.equal(s.controls.ground, false);
+  assert.ok(s.events.some((e) => e.text.includes("GROUND MODE reddedildi")));
+  advance(s, 30);
+  assert.equal(s.phase, "CRUISE");
+  assert.ok(s.outflowPosition < 0.9);
+  assert.equal(s.sources[3].available, false);
+  assert.ok(s.cabinAltitude < 9000);
+});
+test("Ground mode follows the landing field and drops at liftoff", () => {
+  const s = createState();
+  setControl(s, "landingElevation", 5000);
+  setControl(s, "cruiseAltitude", 15000);
+  setControl(s, "cruiseMinutes", 0.5);
+  startFlight(s);
+  for (let t = 0; t < 3600 && s.flightRunning; t += 10) advance(s, 10);
+  assert.equal(s.phase, "GROUND");
+  near(s.altitude, 5000, 0.1);
+  setControl(s, "ground", false);
+  setControl(s, "ground", true);
+  assert.equal(s.controls.ground, true);
+  advance(s, 60);
+  near(s.altitude, 5000, 0.1);
+  assert.equal(s.phase, "GROUND");
+  const lift = createState();
+  lift.controls.altitudeTarget = 12000;
+  advance(lift, 60);
+  assert.equal(lift.controls.ground, false);
+  assert.notEqual(lift.phase, "GROUND");
+  assert.equal(lift.sources[3].available, false);
+});
 test("Manual environment controls cancel a running flight profile", () => {
   const s = createState();
   startFlight(s);

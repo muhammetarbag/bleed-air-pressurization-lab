@@ -305,6 +305,14 @@ const ranges: Partial<Record<keyof Controls, [number, number]>> = {
   descentRate: [300, 10000],
   cruiseMinutes: [0.5, 30],
 };
+/** Air/ground (WOW) model: on ground only within this height of a scenario field. */
+export const FIELD_TOLERANCE = 50;
+export function fieldElevation(s: AircraftState): number | null {
+  const fields = [s.controls.departure, s.controls.landingElevation];
+  return (
+    fields.find((e) => Math.abs(s.altitude - e) <= FIELD_TOLERANCE) ?? null
+  );
+}
 export function setControl<K extends keyof Controls>(
   s: AircraftState,
   key: K,
@@ -321,6 +329,15 @@ export function setControl<K extends keyof Controls>(
       high = key === "engine" ? 100 : key === "zoneTarget" ? 30 : 1;
     value = value.map((v) => clamp(Number(v), low, high)) as Controls[K];
   }
+  const field = fieldElevation(s);
+  if (key === "ground" && value && field === null) {
+    log(
+      s,
+      `GROUND MODE reddedildi · uçak ${Math.round(s.altitude)} ft, meydan yüksekliğinin üzerinde; air/ground (WOW) sinyali AIR`,
+      "warning",
+    );
+    return;
+  }
   s.controls[key] = value;
   if ((key === "altitudeTarget" || key === "airspeed") && s.flightRunning) {
     s.flightRunning = false;
@@ -328,8 +345,8 @@ export function setControl<K extends keyof Controls>(
   }
   if (key === "targetTemp")
     s.controls.zoneTarget = [Number(value), Number(value), Number(value)];
-  if (key === "ground" && value) {
-    s.controls.altitudeTarget = s.controls.departure;
+  if (key === "ground" && value && field !== null) {
+    s.controls.altitudeTarget = field;
     s.flightRunning = false;
     s.phase = "GROUND";
   }
@@ -672,6 +689,10 @@ function flight(s: AircraftState, dt: number): void {
     }
   } else {
     s.altitude = move(s.altitude, c.altitudeTarget, c.verticalSpeed / 60, dt);
+    if (c.ground && s.altitude !== before && fieldElevation(s) === null) {
+      c.ground = false;
+      log(s, "Air/ground → AIR: uçak meydandan ayrıldı, GROUND MODE kapandı");
+    }
     s.phase = c.ground
       ? "GROUND"
       : Math.abs(s.altitude - before) < 0.001
